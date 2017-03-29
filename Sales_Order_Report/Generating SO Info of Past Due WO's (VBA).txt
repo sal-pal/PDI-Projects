@@ -1,0 +1,152 @@
+Sub Button7_Click()
+'
+'IMPORTING TEXT FILE
+'
+'
+    Worksheets("DataSource").Activate
+    Range("A1").Select
+
+    Dim srcfile As String
+    srcfile = InputBox("Enter file path")
+
+    If TypeName(srcfile) <> "String" Then
+        MsgBox ("Value is not a string")
+        
+    Else
+        'Clear all data already on the worksheet.
+        Range("A1").Select
+        Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+        Selection.ClearContents
+        Range("A1").Select
+
+        'Open the file to be imported.
+        Open srcfile For Input As 1
+
+        'Write data to the worksheet.
+        rr = 1
+        Do While Not EOF(1)
+            Line Input #1, RawLine
+            RawLine = Trim(RawLine)
+            tmparr = Split(RawLine, "|")
+            Cells(rr, 1) = tmparr(0)
+            Cells(rr, 2) = tmparr(1)
+            Cells(rr, 3) = tmparr(2)
+            Cells(rr, 4) = tmparr(3)
+            Cells(rr, 5) = tmparr(4)
+            Cells(rr, 6) = tmparr(5)
+
+            rr = rr + 1
+
+        Loop
+
+        Close 1
+
+     End If
+
+           
+           
+    'FIND NUMBER OF ROWS IN FILE
+    Dim num As Integer
+    
+    num = 1
+    While Len(Cells(num, 1).Value) > 0
+        num = num + 1
+    Wend
+    num = num - 1
+    
+    
+    
+    'ENTER "SO" identifier
+    Dim incrVar As Variant
+    Dim totalRws As Integer
+    
+    For incrVar = 1 To num
+        Cells(incrVar, 5).Value = "SO " & Cells(incrVar, 5).Value
+    Next
+    
+    
+    Call NewPartsList
+    
+ 
+    
+    
+End Sub
+
+
+
+Sub DropDown6_Change()
+'
+' CREATE TABLES DISPLAYING SALES ORDER INFO
+'
+'
+    
+    Dim rowCount As Integer
+    Dim i As Integer
+    Dim colCount As Integer
+    Dim comboBox As ControlFormat
+    Dim row As Integer
+    Dim column As Integer
+    Dim sum As Integer
+    Dim elem As Integer
+
+
+    Set comboBox = Worksheets("Control").Shapes(2).ControlFormat
+
+    For i = 1 To 191
+
+        If comboBox.ListIndex = i Then
+
+            'REFRESH TABLES AFTER NEW ITEM SELECTION
+            Range("H7:AL8").ClearContents
+            For row = 7 To 8
+                For column = 11 To 40
+                    RemoveBorders (Cells(row, column))
+                    NoColor (Cells(row, column))
+                Next
+            Next
+
+            'CREATE THE SALES ORDER TABLES
+            colCount = 0
+            For rowCount = 1 To 191
+
+                If Worksheets("DataSource").Cells(rowCount, 1).Value = comboBox.List(i) Then
+                    'ADD DATA TO CORRECT CELLS
+                    Cells(7, 8 + colCount).Value = Worksheets("DataSource").Cells(rowCount, 5).Value                 'SO Number cell
+                    Cells(8, 8 + colCount).Value = Worksheets("DataSource").Cells(rowCount, 4).Value                 'Number of Parts required cell
+                    Cells(8, 8 + colCount + 1).Value = Worksheets("DataSource").Cells(rowCount, 3).Value             'Issue date cell
+
+                    'FORMATTING TABLE
+                    AllBorders (Worksheets("Control").Range(Cells(7, 8 + colCount), Cells(8, 8 + colCount + 1)))     'Creating borders
+                    MergeCenter (Worksheets("Control").Range(Cells(7, 8 + colCount), Cells(7, 8 + colCount + 1)))    'Center the SO Number cell
+
+                    'COLOR CODE TABLE
+                    If Worksheets("DataSource").Cells(rowCount, 6).Value = 1 Then
+                        MakeGreen (Worksheets("Control").Range(Cells(7, 8 + colCount), Cells(8, 8 + colCount + 1)))
+                    Else
+                        MakeGray (Worksheets("Control").Range(Cells(7, 8 + colCount), Cells(8, 8 + colCount + 1)))
+                    End If
+
+
+                   'FIND NUMBER OF PARTS REQUESTED BY ALL SALE ORDERS
+                    sum = 0
+                    For elem = 7 To 27
+                        If TypeName(Cells(8, elem).Value) <> "Date" Then
+                            sum = sum + Cells(8, elem).Value
+                        End If
+                    Next
+
+                    'CREATE TABLE SHOWNG SUM
+                    With Range("K3:K4")
+                        .Cells(1).Value = "Total Rqmt"
+                        .Cells(2).Value = sum
+                        .Cells(2).Font.Size = 14
+                    End With
+                    AllBorders (Worksheets("Control").Range("K3:K4"))
+
+                    colCount = colCount + 3
+                End If
+            Next
+        End If
+
+    Next
+End Sub
