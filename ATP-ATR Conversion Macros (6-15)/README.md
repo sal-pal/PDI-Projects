@@ -1,0 +1,1 @@
+My assignment with this project was collect data from each PDF in a large dataset and store it in spreadsheets. These scripts compose several macros that copied the PDF data into Microsoft’s clipboard, then pasted the data directly into a spreadsheet.
