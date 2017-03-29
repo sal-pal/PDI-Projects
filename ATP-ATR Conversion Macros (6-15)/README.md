@@ -1,0 +1,1 @@
+My assignment with this project was to copy and paste data from a PDF into an Excel spreadsheet. These scripts compose several macros that copied the PDF data into Microsoft’s clipboard, then pasted the data directly into the spreadsheet
